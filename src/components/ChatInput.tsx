@@ -46,7 +46,7 @@ export function ChatInput({ onSend, onStop, isLoading }: ChatInputProps) {
         placeholder="Ask me anything..."
         disabled={isLoading}
         rows={1}
-        className="min-h-[48px] max-h-[160px] resize-none bg-muted/50 border-muted-foreground/20 focus-visible:ring-primary text-base"
+        className="min-h-[48px] max-h-[160px] resize-none bg-muted/50 border-muted-foreground/20 focus-visible:ring-primary text-base md:!text-base !py-3"
       />
 
       {isLoading ? (
