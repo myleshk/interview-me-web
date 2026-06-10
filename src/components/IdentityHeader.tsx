@@ -13,7 +13,7 @@ export function IdentityHeader({ identity, cvUrl }: IdentityHeaderProps) {
     <header className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
       <div className="flex items-center gap-3 min-w-0">
         <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <span className="text-primary font-semibold text-sm">
+          <span className="text-primary font-semibold text-base">
             {identity.name
               .split(" ")
               .map((n) => n[0])
@@ -23,11 +23,11 @@ export function IdentityHeader({ identity, cvUrl }: IdentityHeaderProps) {
           </span>
         </div>
         <div className="min-w-0">
-          <h1 className="text-sm font-semibold text-foreground truncate">
+          <h1 className="text-base font-semibold text-foreground truncate">
             {identity.name}
           </h1>
           {identity.title && (
-            <p className="text-xs text-muted-foreground truncate">
+            <p className="text-sm text-muted-foreground truncate">
               {identity.title}
               {identity.employer ? ` @ ${identity.employer}` : ""}
               {identity.location ? ` · ${identity.location}` : ""}

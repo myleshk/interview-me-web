@@ -18,14 +18,14 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
       )}
     >
       {!isUser && (
-        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-          <span className="text-primary font-semibold text-[10px]">AI</span>
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+          <span className="text-primary font-semibold text-xs">AI</span>
         </div>
       )}
 
       <div
         className={cn(
-          "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words",
+          "max-w-[80%] rounded-2xl px-4 py-3 text-base leading-relaxed whitespace-pre-wrap break-words",
           isUser
             ? "bg-primary text-primary-foreground rounded-br-md"
             : "bg-muted text-foreground rounded-bl-md",
@@ -35,8 +35,8 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
       </div>
 
       {isUser && (
-        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-secondary flex items-center justify-center mt-0.5">
-          <span className="text-secondary-foreground font-semibold text-[10px]">
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-secondary flex items-center justify-center mt-0.5">
+          <span className="text-secondary-foreground font-semibold text-xs">
             You
           </span>
         </div>
