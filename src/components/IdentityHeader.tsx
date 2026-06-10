@@ -1,9 +1,14 @@
 "use client";
 
+import type { AppConfig } from "@/lib/config";
 import { FileText } from "lucide-react";
-import { cvUrl, identity } from "@/lib/identity";
 
-export function IdentityHeader() {
+interface IdentityHeaderProps {
+  identity: AppConfig["identity"];
+  cvUrl: string;
+}
+
+export function IdentityHeader({ identity, cvUrl }: IdentityHeaderProps) {
   return (
     <header className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
       <div className="flex items-center gap-3 min-w-0">

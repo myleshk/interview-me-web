@@ -5,12 +5,7 @@
  * via ``AbortSignal``.
  */
 
-import { apiUrl } from "./identity";
-
-export interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
+import type { ChatMessage } from "./config";
 
 interface SseChunk {
   choices: {
@@ -21,6 +16,7 @@ interface SseChunk {
 }
 
 export async function* streamChat(
+  apiUrl: string,
   messages: ChatMessage[],
   signal?: AbortSignal,
 ): AsyncGenerator<string, void, undefined> {
