@@ -1,0 +1,10 @@
+node_modules
+.next
+.env
+.env.local
+.env.production
+.env.development
+AGENTS.md
+CLAUDE.md
+README.md
+
