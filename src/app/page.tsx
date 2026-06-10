@@ -7,7 +7,6 @@ function env(key: string, fallback: string): string {
 
 function loadConfig(): AppConfig {
   return {
-    apiUrl: env("NEXT_PUBLIC_API_URL", "http://localhost:8000"),
     identity: {
       name: env("NEXT_PUBLIC_IDENTITY_NAME", "Candidate"),
       title: env("NEXT_PUBLIC_IDENTITY_TITLE", ""),

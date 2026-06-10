@@ -5,7 +5,6 @@
  */
 
 export interface AppConfig {
-  apiUrl: string;
   identity: {
     name: string;
     title: string;
@@ -13,9 +12,4 @@ export interface AppConfig {
     location: string;
   };
   cvUrl: string;
-}
-
-export interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
 }

@@ -1,29 +1,28 @@
 "use client";
 
-import { useState, useRef, useCallback, KeyboardEvent } from "react";
-import { Send, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useRef, KeyboardEvent } from "react";
+import { Send, Square } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 interface ChatInputProps {
-  onSend: (message: string) => void;
-  disabled?: boolean;
+  onSend: (text: string) => void;
+  onStop: () => void;
+  isLoading: boolean;
 }
 
-export function ChatInput({ onSend, disabled }: ChatInputProps) {
+export function ChatInput({ onSend, onStop, isLoading }: ChatInputProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleSend = useCallback(() => {
+  const handleSend = () => {
     const trimmed = value.trim();
-    if (!trimmed || disabled) return;
+    if (!trimmed || isLoading) return;
     onSend(trimmed);
     setValue("");
-    // Reset textarea height
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
-  }, [value, disabled, onSend]);
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -39,29 +38,35 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
-          // Auto-resize
           const el = e.target;
           el.style.height = "auto";
           el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
         }}
         onKeyDown={handleKeyDown}
         placeholder="Ask me anything..."
-        disabled={disabled}
+        disabled={isLoading}
         rows={1}
-        className="min-h-[44px] max-h-[160px] resize-none bg-muted/50 border-muted-foreground/20 focus-visible:ring-primary"
+        className="min-h-[48px] max-h-[160px] resize-none bg-muted/50 border-muted-foreground/20 focus-visible:ring-primary text-base"
       />
-      <Button
-        size="icon"
-        onClick={handleSend}
-        disabled={disabled || !value.trim()}
-        className="shrink-0 h-[44px] w-[44px]"
-      >
-        {disabled ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
+
+      {isLoading ? (
+        <button
+          type="button"
+          onClick={onStop}
+          className="shrink-0 h-[48px] w-[48px] inline-flex items-center justify-center rounded-md bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+        >
+          <Square className="h-4 w-4" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={!value.trim()}
+          className="shrink-0 h-[48px] w-[48px] inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+        >
           <Send className="h-4 w-4" />
-        )}
-      </Button>
+        </button>
+      )}
     </div>
   );
 }
