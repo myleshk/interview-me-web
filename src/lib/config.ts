@@ -1,10 +1,12 @@
-/** Configuration types for the chat app.
+/** Runtime configuration loaded from /config.json
  *
- * Values are read from environment variables in a Server Component
- * and passed as props to avoid SSR hydration mismatches.
+ * Local dev: public/config.json (checked into repo with defaults).
+ * K8s: ConfigMap mounts over the file — single source of truth,
+ * no build-time baking required.
  */
 
 export interface AppConfig {
+  apiUrl: string;
   identity: {
     name: string;
     title: string;

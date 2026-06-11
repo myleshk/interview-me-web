@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { IdentityHeader } from "@/components/IdentityHeader";
@@ -16,7 +16,23 @@ function messageText(msg: { parts: Array<{ type: string; text?: string }> }): st
     .join("");
 }
 
-export function ChatApp({ config }: { config: AppConfig }) {
+export function ChatApp() {
+  const [config, setConfig] = useState<AppConfig | null>(null);
+
+  useEffect(() => {
+    fetch("/config.json")
+      .then((res) => res.json())
+      .then(setConfig)
+      .catch(() => {
+        // Fallback: empty config — identity & CV won't render
+        setConfig({
+          apiUrl: "",
+          identity: { name: "", title: "", employer: "", location: "" },
+          cvUrl: "",
+        });
+      });
+  }, []);
+
   const transport = useMemo(
     () => new DefaultChatTransport({ api: "/api/chat" }),
     [],
@@ -33,6 +49,17 @@ export function ChatApp({ config }: { config: AppConfig }) {
       bottomRef.current.scrollIntoView({ behavior: "auto" });
     }
   }, [messages]);
+
+  // Wait for config.json before rendering the UI
+  if (!config) {
+    return (
+      <div className="flex flex-col h-full max-w-2xl mx-auto">
+        <div className="h-16 border-b border-border animate-pulse" />
+        <div className="flex-1" />
+        <div className="h-[72px] border-t border-border animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full max-w-2xl mx-auto">

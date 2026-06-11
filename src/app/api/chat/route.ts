@@ -1,12 +1,28 @@
+import { readFileSync } from "fs";
+import path from "path";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
-// createOpenAI adds /v1 automatically — baseURL must NOT include it.
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+/** Read config.json from disk — cached per process lifetime. */
+let _cachedApiUrl = "";
 
+function getApiUrl(): string {
+  if (_cachedApiUrl) return _cachedApiUrl;
+  try {
+    const configPath = path.join(process.cwd(), "public", "config.json");
+    const raw = readFileSync(configPath, "utf-8");
+    const config = JSON.parse(raw);
+    _cachedApiUrl = config.apiUrl || "http://localhost:8000";
+  } catch {
+    _cachedApiUrl = "http://localhost:8000";
+  }
+  return _cachedApiUrl;
+}
+
+// createOpenAI adds /v1 automatically — baseURL must NOT include it.
 const openai = createOpenAI({
-  baseURL: API_URL,
-  apiKey: "", // no auth required for local dev
+  baseURL: getApiUrl(),
+  apiKey: "",
 });
 
 export async function POST(req: Request) {
@@ -30,6 +46,5 @@ export async function POST(req: Request) {
     messages: converted,
   });
 
-  // useChat + DefaultChatTransport expect the UIMessage stream format
   return result.toUIMessageStreamResponse();
 }

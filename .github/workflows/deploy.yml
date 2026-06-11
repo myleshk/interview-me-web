@@ -1,0 +1,112 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  CONFIG_REPO: myleshk/k0s-config
+  CONFIG_APP_PATH: jp-3/interview-me
+
+jobs:
+  # ── Build & Push ──────────────────────────────────────────
+
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          tags: |
+            type=sha,prefix=,format=short
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── GitOps: Update Config Repo ────────────────────────────
+
+  update-config:
+    needs: build
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout config repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CONFIG_REPO }}
+          token: ${{ secrets.CONFIG_REPO_PAT }}
+          path: config-repo
+
+      - name: Update web image ref in config repo
+        working-directory: config-repo/${{ env.CONFIG_APP_PATH }}
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+
+          config_dir = Path(".")
+          sha_short = os.environ["GITHUB_SHA"][:7]
+          registry = os.environ["REGISTRY"]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          new_image = f"{registry}/{repo}:{sha_short}"
+
+          web_path = config_dir / "web.yaml"
+          if not web_path.exists():
+              raise SystemExit("web.yaml not found in config repo")
+
+          text = web_path.read_text(encoding="utf-8")
+          pattern = rf"(- name: web\n\s+image: )[^\n]+"
+          updated, count = re.subn(pattern, rf"\1{new_image}", text, count=1)
+          if count != 1:
+              raise SystemExit("Could not update image for container 'web' in web.yaml")
+          web_path.write_text(updated, encoding="utf-8")
+          print(f"Updated web image -> {new_image}")
+
+          with open(os.environ["GITHUB_ENV"], "a") as f:
+              f.write("UPDATED_FILES=web.yaml\n")
+          PY
+
+      - name: Commit & Push
+        working-directory: config-repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          for f in $UPDATED_FILES; do
+            git add "${{ env.CONFIG_APP_PATH }}/$f"
+          done
+
+          git diff --cached --quiet || (
+            SHORT_SHA=${GITHUB_SHA:0:7}
+            git commit -m "chore: bump web image to ${SHORT_SHA}" &&
+            git pull --rebase origin main &&
+            git push
+          )

@@ -1,0 +1,10 @@
+{
+  "apiUrl": "http://localhost:8000",
+  "identity": {
+    "name": "Myles Fong",
+    "title": "Software Engineer",
+    "employer": "Melco",
+    "location": "Hong Kong"
+  },
+  "cvUrl": ""
+}
