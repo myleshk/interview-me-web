@@ -1,24 +1,34 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function AuthPage() {
+function AuthForm() {
   const router = useRouter();
-  const [code, setCode] = useState("");
+  const searchParams = useSearchParams();
+  const codeFromUrl = searchParams.get("code") || "";
+
+  const [code, setCode] = useState(codeFromUrl);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Auto-verify when code is in URL (direct link)
+  useEffect(() => {
+    if (codeFromUrl) {
+      handleVerify(codeFromUrl);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Code entry ────────────────────────────────────────
-  const handleVerify = async () => {
-    if (!code.trim()) return;
+  async function handleVerify(codeToUse: string) {
+    if (!codeToUse.trim()) return;
     setSubmitting(true);
     setError("");
 
     const res = await fetch("/web-api/auth/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: code.trim() }),
+      body: JSON.stringify({ code: codeToUse.trim() }),
     });
 
     if (res.ok) {
@@ -27,7 +37,7 @@ export default function AuthPage() {
       setError("Invalid or expired access code.");
       setSubmitting(false);
     }
-  };
+  }
 
   // ── Request form ──────────────────────────────────────
   const [showRequest, setShowRequest] = useState(false);
@@ -75,7 +85,7 @@ export default function AuthPage() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  handleVerify();
+                  handleVerify(code);
                 }}
                 className="space-y-4"
               >
@@ -187,5 +197,13 @@ export default function AuthPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <AuthForm />
+    </Suspense>
   );
 }

@@ -1,0 +1,38 @@
+# interview-me-web
+
+Recruiter-facing chat frontend for the interview-me project. Built with Next.js 16, Vercel AI SDK v6, and Tailwind CSS.
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+Create a `.env` file:
+
+```
+BACKEND_API_URL=http://localhost:8000
+MAX_CODE_USES=5
+CF_ACCOUNT_ID=
+CF_D1_DATABASE_ID=
+CF_API_TOKEN=
+```
+
+See `.env.example` for details.
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/proxy.ts` | Cookie gate on all pages except `/auth` and `/web-api/auth/*` |
+| `src/app/auth/page.tsx` | Access code entry + request form |
+| `src/app/web-api/auth/verify/route.ts` | Validates code against D1, sets cookie |
+| `src/app/web-api/auth/request/route.ts` | Stores access request in D1 |
+| `src/app/web-api/chat/route.ts` | Proxies chat to FastAPI backend via AI SDK |
+| `src/app/ChatApp.tsx` | Main chat UI (`useChat` + config.json fetch) |
+| `src/lib/d1.ts` | Cloudflare D1 REST API client |
+| `public/config.json` | Runtime identity config (overridden by ConfigMap in production) |
+| `schema.sql` | D1 database schema |

@@ -8,7 +8,7 @@ const COOKIE_NAME = "interview_me";
  * Skip: /auth itself, /api/auth/*, /config.json, and static assets.
  */
 export default function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
 
   // Allow public paths
   if (
@@ -24,6 +24,12 @@ export default function proxy(request: NextRequest) {
   const cookie = request.cookies.get(COOKIE_NAME);
   if (cookie?.value === "1") {
     return NextResponse.next();
+  }
+
+  // Direct link with access code
+  const code = searchParams.get("code");
+  if (code) {
+    return NextResponse.redirect(new URL(`/auth?code=${encodeURIComponent(code)}`, request.url));
   }
 
   return NextResponse.redirect(new URL("/auth", request.url));
