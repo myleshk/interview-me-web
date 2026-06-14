@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { d1Query } from "@/lib/d1";
+import { RATE_LIMIT, rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const COOKIE_NAME = "interview_me";
 const MAX_USES = Number(process.env.MAX_CODE_USES || "5");
@@ -10,6 +11,22 @@ interface CodeRow {
 }
 
 export async function POST(req: Request) {
+  // ── Rate limit: 5/min per IP ────────────────────────
+  const ip = getClientIp(req);
+  if (!ip) {
+    return NextResponse.json(
+      { error: "Unable to identify client" },
+      { status: 403 },
+    );
+  }
+  const rl = rateLimit(`verify:${ip}`, RATE_LIMIT.verify.limit, RATE_LIMIT.verify.windowSeconds);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": "60" } },
+    );
+  }
+
   const { code } = (await req.json()) as { code?: string };
   if (!code) {
     return NextResponse.json({ error: "Code required" }, { status: 400 });

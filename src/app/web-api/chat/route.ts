@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { RATE_LIMIT, rateLimit, getCookieValue } from "@/lib/rate-limit";
 
 // createOpenAI adds /v1 automatically — baseURL must NOT include it.
 // Set via env var: local dev → .env, k8s → deployment spec
@@ -11,6 +12,19 @@ const openai = createOpenAI({
 });
 
 export async function POST(req: Request) {
+  // ── Rate limit: 20/min per cookie ───────────────────
+  const cookie = getCookieValue(req);
+  if (!cookie) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+  const rl = rateLimit(`chat:${cookie}`, RATE_LIMIT.chat.limit, RATE_LIMIT.chat.windowSeconds);
+  if (!rl.allowed) {
+    return Response.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": "60" } },
+    );
+  }
+
   const { messages } = await req.json();
 
   // Convert AI SDK v6 UIMessage (parts[]) → OpenAI ModelMessage (content string)
