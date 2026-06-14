@@ -1,27 +1,12 @@
-import { readFileSync } from "fs";
-import path from "path";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
-/** Read config.json from disk — cached per process lifetime. */
-let _cachedApiUrl = "";
-
-function getApiUrl(): string {
-  if (_cachedApiUrl) return _cachedApiUrl;
-  try {
-    const configPath = path.join(process.cwd(), "public", "config.json");
-    const raw = readFileSync(configPath, "utf-8");
-    const config = JSON.parse(raw);
-    _cachedApiUrl = config.apiUrl || "http://localhost:8000";
-  } catch {
-    _cachedApiUrl = "http://localhost:8000";
-  }
-  return _cachedApiUrl;
-}
-
 // createOpenAI adds /v1 automatically — baseURL must NOT include it.
+// Set via env var: local dev → .env, k8s → deployment spec
+const API_URL = process.env.BACKEND_API_URL || "http://localhost:8000";
+
 const openai = createOpenAI({
-  baseURL: getApiUrl(),
+  baseURL: API_URL,
   apiKey: "",
 });
 

@@ -26,7 +26,6 @@ export function ChatApp() {
       .catch(() => {
         // Fallback: empty config — identity & CV won't render
         setConfig({
-          apiUrl: "",
           identity: { name: "", title: "", employer: "", location: "" },
           cvUrl: "",
         });
@@ -34,7 +33,7 @@ export function ChatApp() {
   }, []);
 
   const transport = useMemo(
-    () => new DefaultChatTransport({ api: "/api/chat" }),
+    () => new DefaultChatTransport({ api: "/web-api/chat" }),
     [],
   );
 

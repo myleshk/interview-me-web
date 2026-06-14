@@ -6,7 +6,6 @@
  */
 
 export interface AppConfig {
-  apiUrl: string;
   identity: {
     name: string;
     title: string;
