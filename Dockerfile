@@ -1,5 +1,5 @@
 # ── Build Stage ──────────────────────────────────────────
-FROM node:22-alpine AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
@@ -12,11 +12,11 @@ ENV NODE_ENV=production
 RUN npm run build
 
 # ── Runtime Stage ────────────────────────────────────────
-FROM node:22-alpine AS runner
+FROM node:24-slim AS runner
 
 WORKDIR /app
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN groupadd --system appgroup && useradd --system --no-create-home --gid appgroup appuser
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
