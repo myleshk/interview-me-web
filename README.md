@@ -14,7 +14,7 @@ Open [http://localhost:3000](http://localhost:3000).
 Create a `.env` file:
 
 ```
-BACKEND_API_URL=http://localhost:8000
+BACKEND_API_URL=http://localhost:8000/v1
 MAX_CODE_USES=5
 CF_ACCOUNT_ID=
 CF_D1_DATABASE_ID=

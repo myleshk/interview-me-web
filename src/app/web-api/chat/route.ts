@@ -2,9 +2,10 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import { RATE_LIMIT, rateLimit, getCookieValue } from "@/lib/rate-limit";
 
-// createOpenAI adds /v1 automatically — baseURL must NOT include it.
-// Set via env var: local dev → .env, k8s → deployment spec
-const API_URL = process.env.BACKEND_API_URL || "http://localhost:8000";
+// createOpenAI appends /chat/completions to baseURL — BACKEND_API_URL must include /v1.
+// Local dev: http://localhost:8000/v1  |  K8s: http://api:8000/v1
+// Set via env var: local dev → .env, k8s → ArgoCD deployment spec
+const API_URL = process.env.BACKEND_API_URL || "http://localhost:8000/v1";
 
 const openai = createOpenAI({
   baseURL: API_URL,
