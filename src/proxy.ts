@@ -7,7 +7,7 @@ const COOKIE_NAME = "interview_me";
  * Gate every page request.
  * Skip: /auth itself, /api/auth/*, /config.json, and static assets.
  */
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow public paths
