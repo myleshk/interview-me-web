@@ -1,11 +1,6 @@
 node_modules
 .next
-.env
-.env.local
-.env.production
-.env.development
-AGENTS.md
-CLAUDE.md
+.env*
+!.env.example
 next-env.d.ts
 *.tsbuildinfo
-
