@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { d1Query } from "@/lib/d1";
 
 const COOKIE_NAME = "interview_me";
+const MAX_USES = Number(process.env.MAX_CODE_USES || "5");
 
-interface AccessCode {
+interface CodeRow {
   code: string;
-  max_uses: number | null;
   used_count: number;
 }
 
@@ -15,8 +15,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Code required" }, { status: 400 });
   }
 
-  const rows = await d1Query<AccessCode>(
-    "SELECT code, max_uses, used_count FROM access_codes WHERE code = ?",
+  // ── 1 query on the critical path ─────────────────────
+  const rows = await d1Query<CodeRow>(
+    "SELECT code, used_count FROM access_codes WHERE code = ?",
     [code],
   );
 
@@ -24,19 +25,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid code" }, { status: 401 });
   }
 
-  const entry = rows[0];
-
-  // Check usage limit
-  if (entry.max_uses !== null && entry.used_count >= entry.max_uses) {
-    return NextResponse.json({ error: "Code expired" }, { status: 401 });
+  if (rows[0].used_count >= MAX_USES) {
+    return NextResponse.json({ error: "Code exhausted" }, { status: 401 });
   }
 
-  // Increment usage
-  await d1Query(
-    "UPDATE access_codes SET used_count = used_count + 1 WHERE code = ?",
-    [code],
-  );
-
+  // ── Set cookie, return immediately ───────────────────
   const res = NextResponse.json({ ok: true });
   res.cookies.set(COOKIE_NAME, "1", {
     httpOnly: true,
@@ -45,6 +38,15 @@ export async function POST(req: Request) {
     maxAge: 60 * 60 * 24 * 30, // 30 days
     path: "/",
   });
+
+  // ── Fire-and-forget: log + update counter ────────────
+  d1Query("INSERT INTO access_code_usage (code) VALUES (?)", [code]).catch(
+    (err) => console.error("verify: failed to log usage", err),
+  );
+  d1Query(
+    "UPDATE access_codes SET used_count = used_count + 1 WHERE code = ?",
+    [code],
+  ).catch((err) => console.error("verify: failed to update counter", err));
 
   return res;
 }
