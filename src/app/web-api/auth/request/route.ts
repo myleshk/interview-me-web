@@ -31,10 +31,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Name and email required" }, { status: 400 });
   }
 
-  await d1Query(
-    "INSERT INTO access_requests (name, email, reason) VALUES (?, ?, ?)",
-    [name, email, reason || ""],
-  );
+  try {
+    await d1Query(
+      "INSERT INTO access_requests (name, email, reason) VALUES (?, ?, ?)",
+      [name, email, reason || ""],
+    );
+  } catch (err) {
+    console.error("request: D1 insert failed", err);
+    return NextResponse.json({ error: "Failed to submit request" }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }

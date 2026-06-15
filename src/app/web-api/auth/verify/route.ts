@@ -33,10 +33,16 @@ export async function POST(req: Request) {
   }
 
   // ── 1 query on the critical path ─────────────────────
-  const rows = await d1Query<CodeRow>(
-    "SELECT code, used_count FROM access_codes WHERE code = ?",
-    [code],
-  );
+  let rows: CodeRow[];
+  try {
+    rows = await d1Query<CodeRow>(
+      "SELECT code, used_count FROM access_codes WHERE code = ?",
+      [code],
+    );
+  } catch (err) {
+    console.error("verify: D1 query failed", err);
+    return NextResponse.json({ error: "Service unavailable" }, { status: 500 });
+  }
 
   if (rows.length === 0) {
     return NextResponse.json({ error: "Invalid code" }, { status: 401 });
