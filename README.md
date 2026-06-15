@@ -28,9 +28,12 @@ See `.env.example` for details.
 | Decision | Trade-off | Rationale |
 |----------|-----------|-----------|
 | Internal services unauthenticated (backend, embedding, Qdrant) | Any pod in cluster can reach them | Single-node VPS, no untrusted neighbors; auth adds operational complexity with no security gain |
+| Debug endpoint exposed (`/v1/debug/retrieve`) | Returns raw RAG chunks without auth | Cluster-internal only; useful for development debugging |
 | Cookie not signed (no server-side session) | Forgeable by setting `interview_me=<any>` manually | Demo project with no sensitive content; UUID cookie enables per-session rate limiting without complex auth |
 | Soft access code limit (no atomic update) | ~1 extra use may slip past `MAX_CODE_USES` under concurrent load | Single-recruiter use; race window negligible in practice |
 | In-memory rate limiting (shared `Map`) | Resets on pod restart; per-cookie becomes global bucket with static cookie | Single-pod deployment; no shared-store complexity needed for demo scale |
+| Minimal K8s hardening | No PodSecurityContext, NetworkPolicy, or service account restrictions | Single-user VPS, all code trusted; enterprise hardening adds no value here |
+| Plaintext secrets in K8s manifests | `k0s-config` repo contains secret.yaml with tokens | Private repo; only exposed if made public |
 
 ## Key Files
 
