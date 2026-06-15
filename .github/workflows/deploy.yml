@@ -10,6 +10,10 @@ env:
   CONFIG_REPO: myleshk/k0s-config
   CONFIG_APP_PATH: jp-3/interview-me
 
+concurrency:
+  group: deploy-${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   # ── Test ─────────────────────────────────────────────────
   test:
@@ -63,7 +67,7 @@ jobs:
 
   update-config:
     needs: build
-    if: always() && !cancelled()
+    if: success()
     runs-on: ubuntu-latest
     permissions:
       contents: read
