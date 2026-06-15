@@ -54,7 +54,7 @@ export async function POST(req: Request) {
 
   // ── Set cookie, return immediately ───────────────────
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(COOKIE_NAME, "1", {
+  res.cookies.set(COOKIE_NAME, crypto.randomUUID(), {
     httpOnly: true,
     secure: true,
     sameSite: "lax",

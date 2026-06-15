@@ -22,7 +22,7 @@ export default function proxy(request: NextRequest) {
   }
 
   const cookie = request.cookies.get(COOKIE_NAME);
-  if (cookie?.value === "1") {
+  if (cookie) {
     return NextResponse.next();
   }
 
