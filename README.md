@@ -27,6 +27,7 @@ See `.env.example` for details.
 
 | Decision | Trade-off | Rationale |
 |----------|-----------|-----------|
+| Internal services unauthenticated (backend, embedding, Qdrant) | Any pod in cluster can reach them | Single-node VPS, no untrusted neighbors; auth adds operational complexity with no security gain |
 | Static cookie (not signed session) | Forgeable by setting `interview_me=1` manually | Demo project with no sensitive content; over-engineering auth adds no value |
 | Soft access code limit (no atomic update) | ~1 extra use may slip past `MAX_CODE_USES` under concurrent load | Single-recruiter use; race window negligible in practice |
 | In-memory rate limiting (shared `Map`) | Resets on pod restart; per-cookie becomes global bucket with static cookie | Single-pod deployment; no shared-store complexity needed for demo scale |
