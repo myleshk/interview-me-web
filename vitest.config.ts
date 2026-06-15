@@ -5,6 +5,11 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    coverage: {
+      provider: "istanbul",
+      reporter: ["text", "html"],
+      include: ["src/lib/**/*.ts"],
+    },
   },
   resolve: {
     alias: {

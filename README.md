@@ -1,5 +1,7 @@
 # interview-me-web
 
+[![CI](https://github.com/myleshk/interview-me-web/actions/workflows/deploy.yml/badge.svg)](https://github.com/myleshk/interview-me-web/actions/workflows/deploy.yml)
+
 Recruiter-facing chat frontend for the interview-me project. Built with Next.js 16, Vercel AI SDK v6, and Tailwind CSS.
 
 ## Getting Started
