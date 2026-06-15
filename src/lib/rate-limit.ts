@@ -18,6 +18,9 @@ interface Bucket {
 const store = new Map<string, Bucket>();
 const MAX_KEYS = 10_000;
 
+/** @internal Test seam — exposed for test cleanup. Do not use in production code. */
+export const __store = store;
+
 /** Max window used in the app (2 hours). Used as sweep horizon. */
 const MAX_WINDOW_SECONDS = 7_200;
 
